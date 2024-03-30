@@ -2,8 +2,9 @@ swesh = true
 while swesh do 
 wait(0)
  
-    for _, animal in pairs(game:GetService("Workspace").Islands.Mainland:GetChildren()) do
+    for _, animal in pairs( game:GetService("Workspace").Islands["Forest Island"]:GetChildren()) do
         if animal:FindFirstChild("HumanoidRootPart") then
+
               game.Players.LocalPlayer.Character.PrimaryPart.CFrame = animal.HumanoidRootPart.CFrame
 
  
