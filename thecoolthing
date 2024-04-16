@@ -1,15 +1,555 @@
-swesh = true
-while swesh do 
-wait(0.5)
- 
-    for _, animal in pairs( game:GetService("Workspace").Islands["Forest Island"]:GetChildren()) do
-        if animal:FindFirstChild("HumanoidRootPart") then
 
-              game.Players.LocalPlayer.Character.PrimaryPart.CFrame = animal.HumanoidRootPart.CFrame
+}
+--\\Discord Webhook Settings//--
+getgenv().DiscordWebhook = "" --Put a discord webhook.
+getgenv().ping = "@everyone" --Ex. @everyone, @here; For a specific user: <@!USERID> example: <@!897194178012934194>
 
- 
- 
- 
-       end
- end
- end
+--//Checkers-Start\\--
+local avaiableTypes = {"chests", "ground", "both"}
+if not hopperType or not table.find(avaiableTypes, hopperType) then
+    game.Players.LocalPlayer:Kick("Please choose the serverhopper type!")
+    task.wait(0.01)
+    while true do end
+end
+if not ping or string.len(ping) == 0 then
+    ping = "@everyone"
+end
+if not tonumber(AutoKick) or tonumber(AutoKick) < 15 then
+    AutoKick = 60
+end
+--//Checkers-End\\--
+
+--//Function-Start\\--
+local function getLocalCharacter()
+    if game.Players.LocalPlayer then
+        if game.Players.LocalPlayer.Character then
+            return game.Players.LocalPlayer.Character
+        else
+            return "error: no character avaiable"
+        end
+    else
+        return "error: no local player"
+    end
+end
+--//Function-End\\--
+
+local Request = request or http_request or (identifyexecutor() == "Synapse X" and syn.request) or (http and http.request)
+if hopperType == "chests" then
+    --//Loading-Start\\--
+    warn('Made by the MXS developers team.')
+    repeat wait() until game:IsLoaded()
+    repeat wait() until game.Players.LocalPlayer
+    if game.PlaceId == 5130598377 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(6846458508, game.Players.LocalPlayer)
+    end
+    repeat wait() until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DataLoading")
+    game.Players.LocalPlayer.PlayerGui.DataLoading:Destroy()
+    repeat wait() until game.Players.LocalPlayer["Character"] ~= nil
+    --//Loading-End\\--
+
+    --//Checkers-Start\\--
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                game.CoreGui.DescendantAdded:Connect(function(child)
+                    if child.Name == "ErrorPrompt" then
+                        local GrabError = child:FindFirstChild("ErrorMessage", true)
+                        repeat wait() until GrabError.Text ~= "Label"
+                        local Reason = GrabError.Text
+                        if Reason:find("kick") or Reason:find("You") or Reason:find("conn") or Reason:find("rejoin") or
+                            Reason:find("Teleport") or Reason:find("place") then
+                            task.wait(0.01)
+                            game:GetService("TeleportService"):Teleport(6846458508, game:GetService("Players").LocalPlayer)
+                        end
+                    end
+                end)
+            end)
+        end
+    end)
+
+    delay(AutoKick, function()
+        --serverhop here
+    end)
+    --//Checkers-End\\--
+
+    --//Credits-Start\\--
+    local fuefusiufjnfdsj = game.Players.LocalPlayer.Name
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "MXS V2",
+        Text = "Welcome "..fuefusiufjnfdsj.."!, This script was made by the MXS developers team! https://discord.gg/ckJVZNPr7g",
+        Duration = "5",
+        Callback = NotificationBindable,
+    })
+    --//Credits-End\\--
+
+    --//Functions-Start\\--
+    local function getTime()
+        local date = os.date("*t")
+        return ("%02d:%02d"):format(((date.hour % 24) - 1) % 12 + 1, date.min)
+    end
+    --//Functions-End\\--
+
+    --//AutoStore-Webhook-Start\\--
+    function getInChr()
+        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if table.find(ItemsToStore, v.Name) then
+                v.Parent = game.Players.LocalPlayer.Character
+            end
+        end
+    end
+    coroutine.wrap(function()
+        while task.wait() do
+            getInChr()
+            wait(0.1)
+            local ohString1 = "ItemInventory"
+            local ohTable2 = {
+                ["AddItems"] = true
+            }
+            game:GetService("ReplicatedStorage").Remotes.InventoryRemote:FireServer(ohString1, ohTable2)
+        end
+    end)()
+    coroutine.wrap(function()
+        pcall(function()
+            game.Players.LocalPlayer.Backpack.ChildAdded:Connect(function(v)
+                if string.len(DiscordWebhook) == 120 then
+                    if string.find(DiscordWebhook, "discord.com/api") then
+                        if table.find(ItemsToStore, v.Name) then
+                            local username = game.Players.LocalPlayer.name
+                            local embed = {{
+                                ["color"] = 3027255,
+                                ["fields"] = {{
+                                    name = 'Username',
+                                    value = '||' .. username .. '||'
+                                }, {
+                                    name = 'Item',
+                                    value = v.Name
+                                }}
+                            }}
+                
+                            local response = syn.request({
+                                Url = DiscordWebhook,
+                                Method = 'POST',
+                                Headers = {
+                                    ["Content-Type"] = "application/json"
+                                },
+                                Body = game:GetService('HttpService'):JSONEncode({
+                                    avatar_url = "https://cdn.discordapp.com/attachments/933294307429994556/971071145598140436/unknown.png",
+                                    content = ping,
+                                    username = "MXS V2",
+                                    embeds = embed
+                                })
+                            })
+                            wait(2)
+                            return
+                        end 
+                    end
+                end
+            end)
+        end)
+    end)()
+    --//AutoStore-Webhook-End
+
+    --//MainModule-Start\\--
+    local ObjectsFolder = Instance.new('Folder', game.Workspace)
+    ObjectsFolder.Name = "IM4RH0nas2BPBBFDDYUC2VKw8uf9HonVkHg"
+    local waitTime = 0
+
+    for _,item in pairs(game.Workspace.ItemSpawns.Chests:GetDescendants()) do
+        if item.Name == "Chest" then
+            item.Parent = ObjectsFolder
+        end
+    end
+    wait(2)
+    for i = 1, #ObjectsFolder:GetChildren() do
+        waitTime = waitTime + 5
+    end
+    local AMorPM
+    local currentHour = os.date("*t")["hour"]
+    if currentHour < 12 or currentHour == 24 then
+        AMorPM = 'AM'
+    else
+        AMorPM = 'PM'
+    end
+    rconsolename('MXS v2')
+    rconsoleinfo('Username: '..fuefusiufjnfdsj..' -->'..' Found '..#ObjectsFolder:GetChildren()..' chests '..'--> '..'ServerId: '..game.JobId..' --> '..'Time: '..getTime()..' '..AMorPM)
+    wait(1)
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                for i, v in pairs(ObjectsFolder:GetChildren()) do
+                    if v.Name == "Chest" and v:FindFirstChild("RootPart") then
+                        if v.RootPart:FindFirstChild("ProximityAttachment") then
+                            getLocalCharacter().HumanoidRootPart.CFrame = v.RootPart.CFrame * CFrame.new(2,2,2)
+                            if game:GetService("Players").LocalPlayer:DistanceFromCharacter(v.RootPart.Position) then 
+                                if v.RootPart.ProximityAttachment:FindFirstChild("Interaction") then
+                                    fireproximityprompt(v.RootPart.ProximityAttachment.Interaction, 5)
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+    wait(tonumber(waitTime))
+    while task.wait() do
+        if #ObjectsFolder:GetChildren() == 0 then
+            --serverhop here
+        end
+    end
+    --//MainModule-End\\--
+elseif hopperType == "ground" then
+    --//Loading-Start\\--
+    warn('Made by the MXS developers team.')
+    repeat wait() until game:IsLoaded()
+    repeat wait() until game.Players.LocalPlayer
+    if game.PlaceId == 5130598377 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(6846458508, game.Players.LocalPlayer)
+    end
+    repeat wait() until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DataLoading")
+    game.Players.LocalPlayer.PlayerGui.DataLoading:Destroy()
+    repeat wait() until game.Players.LocalPlayer["Character"] ~= nil
+    --//Loading-End\\--
+    
+    --//Checkers-Start\\--
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                game.CoreGui.DescendantAdded:Connect(function(child)
+                    if child.Name == "ErrorPrompt" then
+                        local GrabError = child:FindFirstChild("ErrorMessage", true)
+                        repeat wait() until GrabError.Text ~= "Label"
+                        local Reason = GrabError.Text
+                        if Reason:find("kick") or Reason:find("You") or Reason:find("conn") or Reason:find("rejoin") or
+                            Reason:find("Teleport") or Reason:find("place") then
+                            task.wait(0.01)
+                            game:GetService("TeleportService"):Teleport(6846458508, game:GetService("Players").LocalPlayer)
+                        end
+                    end
+                end)
+            end)
+        end
+    end)
+    
+    delay(AutoKick, function()
+        --serverhop here
+    end)
+    --//Checkers-End\\--
+    
+    --//Credits-Start\\--
+    local fuefusiufjnfdsj = game.Players.LocalPlayer.Name
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "MXS",
+        Text = "Welcome "..fuefusiufjnfdsj.."!, This script was made by the MXS developers team! https://discord.gg/ckJVZNPr7g",
+        Duration = "5",
+        Callback = NotificationBindable,
+    })
+    --//Credits-End\\--
+    
+    --//Functions-Start\\--
+    local function getTime()
+        local date = os.date("*t")
+        return ("%02d:%02d"):format(((date.hour % 24) - 1) % 12 + 1, date.min)
+    end
+    --//Functions-End\\--
+    
+    --//AutoStore-Webhook-Start\\--
+    function getInChr()
+        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if table.find(ItemsToStore, v.Name) then
+                v.Parent = game.Players.LocalPlayer.Character
+            end
+        end
+    end
+    coroutine.wrap(function()
+        while task.wait() do
+            getInChr()
+            wait(0.1)
+            local ohString1 = "ItemInventory"
+            local ohTable2 = {
+                ["AddItems"] = true
+            }
+            game:GetService("ReplicatedStorage").Remotes.InventoryRemote:FireServer(ohString1, ohTable2)
+        end
+    end)()
+    coroutine.wrap(function()
+        game.Players.LocalPlayer.Backpack.ChildAdded:Connect(function(v)
+            if string.len(DiscordWebhook) == 120 then
+                if string.find(DiscordWebhook, "discord.com/api") then
+                    if table.find(ItemsToStore, v.Name) then
+                        local username = game.Players.LocalPlayer.name
+                        local embed = {{
+                            ["color"] = 3027255,
+                            ["fields"] = {{
+                                name = 'Username',
+                                value = '||' .. username .. '||'
+                            }, {
+                                name = 'Item',
+                                value = v.Name
+                            }}
+                        }}
+            
+                        local response = syn.request({
+                            Url = DiscordWebhook,
+                            Method = 'POST',
+                            Headers = {
+                                ["Content-Type"] = "application/json"
+                            },
+                            Body = game:GetService('HttpService'):JSONEncode({
+                                avatar_url = "https://cdn.discordapp.com/attachments/933294307429994556/971071145598140436/unknown.png",
+                                content = ping,
+                                username = "MXS",
+                                embeds = embed
+                            })
+                        })
+                        wait(2)
+                        return
+                    end 
+                end
+            end
+        end)
+    end)()
+    --//AutoStore-Webhook-End
+    
+    --//MainModule-Start\\--
+    local ObjectsFolder = Instance.new('Folder', game.Workspace)
+    ObjectsFolder.Name = "IM4RH0nas2BPBBFDDYUC2VKw8uf9HonVkHg"
+    local waitTime = 0
+    
+    for _,item in pairs(game:GetService("Workspace").ItemSpawns.StandardItems:GetDescendants()) do
+        if table.find(GroundItems, item.Name) then
+            item.Parent = ObjectsFolder
+        end
+    end
+    wait(2)
+    for i = 1, #ObjectsFolder:GetChildren() do
+        waitTime = waitTime + 3
+    end
+    local AMorPM
+    local currentHour = os.date("*t")["hour"]
+    if currentHour < 12 or currentHour == 24 then
+        AMorPM = 'AM'
+    else
+        AMorPM = 'PM'
+    end
+    for k = 1, #ObjectsFolder:GetChildren() do
+        for _,consoleItem in pairs(ObjectsFolder:GetChildren()) do
+            local itemName = consoleItem.Name
+            rconsolename('MXS v2')
+            rconsoleinfo('Username: '..fuefusiufjnfdsj..' -->'..' Found '..tostring(itemName)..' --> '..'ServerId: '..game.JobId..' --> '..'Time: '..getTime()..' '..AMorPM)
+        end
+    end
+    wait(1)
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                for i, v in pairs(ObjectsFolder:GetChildren()) do
+                    if table.find(GroundItems, v.Name) and v:FindFirstChild("ProximityAttachment") then
+                        getLocalCharacter().HumanoidRootPart.CFrame = v.CFrame * CFrame.new(2,2,2)
+                        if game:GetService("Players").LocalPlayer:DistanceFromCharacter(v.Position) then 
+                            if v.ProximityAttachment:FindFirstChild("Interaction") then
+                                fireproximityprompt(v.ProximityAttachment.Interaction, 5)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+    wait(tonumber(waitTime))
+    while task.wait() do
+        if #ObjectsFolder:GetChildren() == 0 then
+            --serverhop here
+        end
+    end
+    --//MainModule-End\\--
+elseif hopperType == "both" then
+    --//Loading-Start\\--
+    warn('Made by the MXS developers team.')
+    repeat wait() until game:IsLoaded()
+    repeat wait() until game.Players.LocalPlayer
+    if game.PlaceId == 5130598377 then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(6846458508, game.Players.LocalPlayer)
+    end
+    repeat wait() until game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("DataLoading")
+    game.Players.LocalPlayer.PlayerGui.DataLoading:Destroy()
+    repeat wait() until game.Players.LocalPlayer["Character"] ~= nil
+    --//Loading-End\\--
+
+    --//Checkers-Start\\--
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                game.CoreGui.DescendantAdded:Connect(function(child)
+                    if child.Name == "ErrorPrompt" then
+                        local GrabError = child:FindFirstChild("ErrorMessage", true)
+                        repeat wait() until GrabError.Text ~= "Label"
+                        local Reason = GrabError.Text
+                        if Reason:find("kick") or Reason:find("You") or Reason:find("conn") or Reason:find("rejoin") or
+                            Reason:find("Teleport") or Reason:find("place") then
+                            task.wait(0.01)
+                            game:GetService("TeleportService"):Teleport(6846458508, game:GetService("Players").LocalPlayer)
+                        end
+                    end
+                end)
+            end)
+        end
+    end)
+
+    delay(AutoKick, function()
+        --serverhop here
+    end)
+    --//Checkers-End\\--
+
+    --//Credits-Start\\--
+    local fuefusiufjnfdsj = game.Players.LocalPlayer.Name
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "MXS",
+        Text = "Welcome "..fuefusiufjnfdsj.."!, This script was made by the MXS developers team! https://discord.gg/ckJVZNPr7g",
+        Duration = "5",
+        Callback = NotificationBindable,
+    })
+    --//Credits-End\\--
+
+    --//Functions-Start\\--
+    local function getTime()
+        local date = os.date("*t")
+        return ("%02d:%02d"):format(((date.hour % 24) - 1) % 12 + 1, date.min)
+    end
+    --//Functions-End\\--
+
+    --//AutoStore-Webhook-Start\\--
+    function getInChr()
+        for i,v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
+            if table.find(ItemsToStore, v.Name) then
+                v.Parent = game.Players.LocalPlayer.Character
+            end
+        end
+    end
+    coroutine.wrap(function()
+        while task.wait() do
+            getInChr()
+            wait(0.1)
+            local ohString1 = "ItemInventory"
+            local ohTable2 = {
+                ["AddItems"] = true
+            }
+            game:GetService("ReplicatedStorage").Remotes.InventoryRemote:FireServer(ohString1, ohTable2)
+        end
+    end)()
+    coroutine.wrap(function()
+        game.Players.LocalPlayer.Backpack.ChildAdded:Connect(function(v)
+            if string.len(DiscordWebhook) == 120 then
+                if string.find(DiscordWebhook, "discord.com/api") then
+                    if table.find(ItemsToStore, v.Name) then
+                        local username = game.Players.LocalPlayer.name
+                        local embed = {{
+                            ["color"] = 3027255,
+                            ["fields"] = {{
+                                name = 'Username',
+                                value = '||' .. username .. '||'
+                            }, {
+                                name = 'Item',
+                                value = v.Name
+                            }}
+                        }}
+            
+                        local response = syn.request({
+                            Url = DiscordWebhook,
+                            Method = 'POST',
+                            Headers = {
+                                ["Content-Type"] = "application/json"
+                            },
+                            Body = game:GetService('HttpService'):JSONEncode({
+                                avatar_url = "https://cdn.discordapp.com/attachments/933294307429994556/971071145598140436/unknown.png",
+                                content = ping,
+                                username = "MXS",
+                                embeds = embed
+                            })
+                        })
+                        wait(2)
+                        return
+                    end 
+                end
+            end
+        end)
+    end)()
+    --//AutoStore-Webhook-End
+
+    --//MainModule-Start\\--
+    local ObjectsFolder = Instance.new('Folder', game.Workspace)
+    ObjectsFolder.Name = "IM4RH0nas2BPBBFDDYUC2VKw8uf9HonVkHg"
+    local waitTime = 0
+
+    for _,item in pairs(game:GetService("Workspace").ItemSpawns.StandardItems:GetDescendants()) do
+        if table.find(GroundItems, item.Name) then
+            item.Parent = ObjectsFolder
+        end
+    end
+    for _,item2 in pairs(game.Workspace.ItemSpawns.Chests:GetDescendants()) do
+        if item2.Name == "Chest" then
+            item2.Parent = ObjectsFolder
+        end
+    end
+    wait(2)
+    for i = 1, #ObjectsFolder:GetChildren() do
+        for _,item3 in pairs(ObjectsFolder:GetChildren()) do
+            if item3.Name == "Chests" then
+                waitTime = waitTime + 5
+            elseif table.find(GroundItems, item3.Name) then
+                waitTime = waitTime + 3
+            end
+        end
+    end
+    local AMorPM
+    local currentHour = os.date("*t")["hour"]
+    if currentHour < 12 or currentHour == 24 then
+        AMorPM = 'AM'
+    else
+        AMorPM = 'PM'
+    end
+    for k = 1, #ObjectsFolder:GetChildren() do
+        for _,consoleItem in pairs(ObjectsFolder:GetChildren()) do
+            local itemName = consoleItem.Name
+            rconsolename('MXS v2')
+            rconsoleinfo('Username: '..fuefusiufjnfdsj..' -->'..' Found a '..tostring(itemName)..' --> '..'ServerId: '..game.JobId..' --> '..'Time: '..getTime()..' '..AMorPM)
+        end
+    end
+    wait(1)
+    spawn(function()
+        while task.wait() do
+            pcall(function()
+                for i, v in pairs(ObjectsFolder:GetChildren()) do
+                    if v.Name == "Chest" and v:FindFirstChild("RootPart") then
+                        if v.RootPart:FindFirstChild("ProximityAttachment") then
+                            getLocalCharacter().HumanoidRootPart.CFrame = v.RootPart.CFrame * CFrame.new(2,2,2)
+                            if game:GetService("Players").LocalPlayer:DistanceFromCharacter(v.RootPart.Position) then 
+                                if v.RootPart.ProximityAttachment:FindFirstChild("Interaction") then
+                                    fireproximityprompt(v.RootPart.ProximityAttachment.Interaction, 5)
+                                end
+                            end
+                        end
+                    elseif table.find(GroundItems, v.Name) and v:FindFirstChild("ProximityAttachment") then
+                        getLocalCharacter().HumanoidRootPart.CFrame = v.CFrame * CFrame.new(2,2,2)
+                        if game:GetService("Players").LocalPlayer:DistanceFromCharacter(v.Position) then 
+                            if v.ProximityAttachment:FindFirstChild("Interaction") then
+                                fireproximityprompt(v.ProximityAttachment.Interaction, 5)
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end)
+    wait(tonumber(waitTime))
+    while task.wait() do
+        if #ObjectsFolder:GetChildren() == 0 then
+            --serverhop here
+        end
+    end
+    --//MainModule-End\\--
+else
+    game.Players.LocalPlayer:Kick('Options: "chests", "ground", "both"')
+    task.wait(0.01)
+    while true do end
+end
